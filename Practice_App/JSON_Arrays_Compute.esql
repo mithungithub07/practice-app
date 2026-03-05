@@ -1,0 +1,67 @@
+
+CREATE COMPUTE MODULE JSON_Arrays_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- CALL CopyMessageHeaders();
+		-- CALL CopyEntireMessage();
+		/* Usefull Website for Array --> https://community.ibm.com/community/user/blogs/matthias-blomme/2025/08/18/create-json-arrays-in-esql-and-java-without-losing?hlmlt=VT */
+		
+		/* 
+		
+		In general, there are 2 proper ways of generating JSON arrays in ESQL,
+		either by creating array items
+		with CREATE LASTCHILD statement,
+		or by directly creating array items by referencing the index:
+		
+		*/
+		
+		--Array_1
+--		CREATE FIELD OutputRoot.JSON.Data.Array IDENTITY (JSON.Array)Array;
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.Array TYPE NameValue NAME 'Item' VALUE 'valueA';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.Array TYPE NameValue NAME 'Item' VALUE 'valueB';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.Array TYPE NameValue NAME 'Item' VALUE 42;
+--		
+		--Array_2--Easy_Direct_Assign
+		CREATE FIELD OutputRoot.JSON.Data.directAssign IDENTITY (JSON.Array)directAssign;
+		SET OutputRoot.JSON.Data.directAssign.Item[1] = 'valueD';
+		SET OutputRoot.JSON.Data.directAssign.Item[2] = 'valueE';
+		SET OutputRoot.JSON.Data.directAssign.Item[3] = 'valueF';
+		SET OutputRoot.JSON.Data.directAssign.Item[4] = BASE64ENCODE('valueZ');
+		
+		
+		--Building an array of JSON objects
+		--Array_3 Using LastChild
+		
+--		CREATE FIELD OutputRoot.JSON.Data.objectArray IDENTITY (JSON.Array)objectArray;
+--		
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray NAME 'Item';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray.Item[<] NAME 'key' VALUE 'value_1';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray NAME 'Item';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray.Item[<] NAME 'key' VALUE 'value_2';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray NAME 'Item';
+--		CREATE LASTCHILD OF OutputRoot.JSON.Data.objectArray.Item[<] NAME 'key' VALUE 'value_3';
+		
+		--Array_4_Direct_Reference_Easy_Direct_Assign
+		CREATE FIELD OutputRoot.JSON.Data.objectArrayDirect IDENTITY (JSON.Array)objectArrayDirect;
+		SET OutputRoot.JSON.Data.objectArrayDirect.Item[1]."Code" = 'valueG';
+		SET OutputRoot.JSON.Data.objectArrayDirect.Item[2]."Description" = 'valueH';
+		SET OutputRoot.JSON.Data.objectArrayDirect.Item[3]."Extra" = 'valueI';
+		
+
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;
