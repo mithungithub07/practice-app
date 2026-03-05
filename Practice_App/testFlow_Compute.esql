@@ -4,6 +4,7 @@ CREATE COMPUTE MODULE testFlow_Compute
 		-- CALL CopyMessageHeaders();
 		CALL CopyEntireMessage();
 		
+		Set OutputRoot.JSON.Data.TestMessage = 'SuccessFul';
 		
 	
 			RETURN TRUE;
